@@ -1,2 +1,24 @@
 Password
 Booking
+Moving Median
+Stack Reserve Compare
+Stack Concatenate
+Evaluate Postfix
+Queue Count
+Queue Check
+Food Delivery
+Restaurant
+
+Pair GTE
+Zipcode
+Ordered Set
+Ice Cream
+Min of Max
+Line Monopoly
+Change Data
+Sort Position
+Auction
+Company Department
+CPU Reservation
+Top Sale
+Digital Wallet
