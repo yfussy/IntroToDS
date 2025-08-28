@@ -1,4 +1,3 @@
-Password
 Booking
 Moving Median
 Stack Reserve Compare
