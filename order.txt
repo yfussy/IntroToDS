@@ -1,11 +1,4 @@
-Moving Median
-Stack Reserve Compare
-Stack Concatenate
-Evaluate Postfix
-Queue Count
-Queue Check
-Food Delivery
-Restaurant
+Queue Check ???
 
 Pair GTE
 Zipcode
