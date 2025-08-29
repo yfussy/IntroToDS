@@ -1,4 +1,3 @@
-Booking
 Moving Median
 Stack Reserve Compare
 Stack Concatenate
