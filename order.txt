@@ -1,15 +1,25 @@
-Queue Check ???
-
-Pair GTE
+q0
 Zipcode
+
+q1
 Ordered Set
 Ice Cream
 Min of Max
 Line Monopoly
-Change Data
 Sort Position
-Auction
 Company Department
 CPU Reservation
 Top Sale
+
+midterm
+Auction
+
+q2
+Pair GTE
+Change Data
+
+q3
+Queue Check
+
+final
 Digital Wallet
