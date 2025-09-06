@@ -1,4 +1,4 @@
 .qodo/
 .vscode/
 *.exe
-test.cpp
+checker/
