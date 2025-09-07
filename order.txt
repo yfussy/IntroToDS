@@ -1,13 +1,4 @@
-q0
-Zipcode
-
 q1
-Ordered Set
-Ice Cream
-Min of Max
-Line Monopoly
-Sort Position
-Company Department
 CPU Reservation
 Top Sale
 
