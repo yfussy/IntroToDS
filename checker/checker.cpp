@@ -3,8 +3,10 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <queue>
 #include <fstream>
 #include <algorithm>
+#include <chrono>
 
 using namespace std;
 
@@ -12,7 +14,7 @@ template <typename T>
 vector<T> problem(ifstream &fin) {
     vector<T> result;
 
-
+    
 
     return result;
 }
@@ -42,15 +44,22 @@ void testCases(string name, int caseStart, int caseEnd) {
     
         ifstream fin("input/" + dir + "in");
         ifstream fout("output/" + dir + "sol");
+
         
-        vector<T> answer = problem(fin);
-    
+        auto start = chrono::high_resolution_clock::now();
+        vector<T> answer = problem<T>(fin);
+        auto end = chrono::high_resolution_clock::now();
+        
         answerCheck(fout, answer);
+        
+        chrono::duration<double> duration = end - start;
+        cout << "Execution time: " << duration.count() << " s" << endl;
+    
         cout << endl;
     }
 }
 
 int main() {
     
-    testCases<string>("d66_q1c_company_department", 9, 16);
+    testCases<string>("d66_q1a_topsale", 1, 1);
 }
