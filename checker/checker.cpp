@@ -7,21 +7,16 @@
 #include <fstream>
 #include <algorithm>
 #include <chrono>
+#include <sstream>
 
 using namespace std;
 
-template <typename T>
-vector<T> problem(ifstream &fin) {
-    vector<T> result;
-
-    
-
-    return result;
+void problem() {
+   
 }
 
-template <typename T>
-void answerCheck(ifstream &fout, vector<T> &answer) {
-    T key;
+void answerCheck(ifstream &fout, vector<string> &answer) {
+    string key;
     bool mismatch = false;
     int i = 0;
     while (fout >> key) {
@@ -35,19 +30,50 @@ void answerCheck(ifstream &fout, vector<T> &answer) {
     if (!mismatch) cout << "Answers are correct!" << endl;
 }
 
-template <typename T>
-void testCases(string name, int caseStart, int caseEnd) {
+template <typename F>
+vector<string> runAndCapture(F func, const string &inputFile) {
+    // Save original buffers
+    streambuf* oldCout = cout.rdbuf();
+    streambuf* oldCin = cin.rdbuf();
+
+    // Redirect cout to buffer
+    ostringstream outBuffer;
+    cout.rdbuf(outBuffer.rdbuf());
+
+    // Redirect cin to file
+    ifstream fin(inputFile);
+    cin.rdbuf(fin.rdbuf());
+
+    // Run problem (which now just uses cin/cout)
+    func();
+
+    // Restore cin and cout
+    cout.rdbuf(oldCout);
+    cin.rdbuf(oldCin);
+
+    // Split captured output
+    vector<string> result;
+    istringstream iss(outBuffer.str());
+    string word;
+    while (iss >> word) result.push_back(word);
+
+    return result;
+}
+
+template <typename F>
+void testCases(string name, int caseStart, int caseEnd, F func) {
     
     for (int i = caseStart; i <= caseEnd; i++) {
         cout << "Test Case: " << i << endl;
         string dir = name + "." + to_string(i) + ".";
-    
-        ifstream fin("input/" + dir + "in");
-        ifstream fout("output/" + dir + "sol");
-
         
+        string inFile  = "input/"  + dir + "in";
+        string outFile = "output/" + dir + "sol";
+
+        ifstream fout(outFile);
+
         auto start = chrono::high_resolution_clock::now();
-        vector<T> answer = problem<T>(fin);
+        vector<string> answer = runAndCapture(func, inFile);
         auto end = chrono::high_resolution_clock::now();
         
         answerCheck(fout, answer);
@@ -61,5 +87,5 @@ void testCases(string name, int caseStart, int caseEnd) {
 
 int main() {
     
-    testCases<string>("d66_q1a_topsale", 1, 1);
+    testCases("d66_q1a_topsale", 1, 1, problem);
 }
