@@ -1,6 +1,8 @@
 q1
-CPU Reservation
-Top Sale
+Wall Paint ***
+Range Insert
+Stack by Vector
+Stack by Vector 2
 
 midterm
 Auction
@@ -8,6 +10,15 @@ Auction
 q2
 Pair GTE
 Change Data
+Is reverse?
+Vector Compress
+Wasted Space
+Iterator Check
+Vector Mirror
+Vector Range Erase
+Vector less
+Vector Partial Sort
+Vector Multi Unique
 
 q3
 Queue Check
