@@ -1,6 +1,5 @@
 q1
 Wall Paint ***
-Range Insert
 Stack by Vector
 Stack by Vector 2
 
