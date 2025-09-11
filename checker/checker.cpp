@@ -86,6 +86,6 @@ void testCases(string name, int caseStart, int caseEnd, F func) {
 }
 
 int main() {
-    
-    testCases("d66_q1a_topsale", 1, 1, problem);
+    ios_base::sync_with_stdio(false); cin.tie(0);
+    testCases("d62_q1b_queue_count", 1, 1, problem);
 }
