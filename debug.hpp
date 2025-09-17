@@ -67,6 +67,7 @@ printVar(const T& container) {
 // Map
 template <typename K, typename V>
 void printVar (const map<K, V>& m) {
+    cout << endl;
     for (auto it = m.begin(); it != m.end(); ++it) {
         printVar(it->first);
         cout << ": ";
