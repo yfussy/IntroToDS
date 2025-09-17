@@ -3,3 +3,4 @@
 *.exe
 *.in
 *.sol
+temp_output.txt
