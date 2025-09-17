@@ -71,6 +71,10 @@ void testCases(string name, int caseStart, int caseEnd, F func) {
         string outFile = "output/" + dir + "sol";
 
         ifstream fout(outFile);
+        if (!fout.is_open()) {
+            cout << "Test Case not found. Skipping..." << endl;
+            continue;
+        }
 
         auto start = chrono::high_resolution_clock::now();
         vector<string> answer = runAndCapture(func, inFile);
