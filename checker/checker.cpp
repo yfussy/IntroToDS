@@ -73,21 +73,6 @@ void problem() {
     cout << paint.size();
 }
 
-void answerCheck(ifstream &fout, vector<string> &answer) {
-    string key;
-    bool mismatch = false;
-    int i = 0;
-    while (fout >> key) {
-        if (key != answer[i]) {
-            cout << "Mismatch!: " << answer[i] << " - " << key << endl;
-
-            mismatch = true;
-        }
-        i++;
-    }
-    if (!mismatch) cout << "Answers are correct!" << endl;
-}
-
 bool runWithTimeout(const string &exe, const string &inFile, const string &tmpFile, int timeoutMs) {
     // Builds the cmd line for sub process in solver mode
     string cmd = "\"" + exe + "\" --solve " + inFile + " " + tmpFile;
