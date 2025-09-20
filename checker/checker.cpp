@@ -12,80 +12,37 @@
 
 using namespace std;
 
-void problem() {
-   int n, m, x, c, d;
-    cin >> n >> m;
-
-    map<int, pair<int, int>> order;
-    map<int, set<pair<int, int>>> paint;
-    for (int i = 0; i < 2 * m; i++) {
-        cin >> x >> c >> d;
-        if (!d) {
-            order[c].first = x;
-        } else {
-            order[c].second = x;
-        }
-    }
-
-    for (auto &o : order) {
-        auto &[start, end] = o.second;
-        int layer = 0;
-        while (true) {
-            auto &paintLayer = paint[layer];
-
-            // Empty layer
-            if (!paintLayer.size()) {
-                paintLayer.insert({start, end});
-                break;
-            }
-
-            auto it = paintLayer.lower_bound({start, end});
-            if (it != paintLayer.begin()) it = prev(it);
-
-            // Going up the layers
-            if (it->first < start && it->second > end) {
-                layer++;
-                continue;
-            }
-
-            if (it->second < start) {
-                // check adjacent left
-                if (start - it->second == 1) {
-                    start = it->first;
-                    it = paintLayer.erase(it);
-                } else {
-                    it = next(it);
-                }
-
-                if (it == paintLayer.end() || it->first > end) {
-                    // check adjacent right
-                    if (it != paintLayer.end() && it->first - end == 1) {
-                        end = it->second;
-                        paintLayer.erase(it);
-                    }
-                    paintLayer.insert({start, end});
-                }
-            }
-            break;
-        }
-    }
-
-    cout << paint.size();
-}
-
 bool runWithTimeout(const string &exe, const string &inFile, const string &tmpFile, int timeoutMs) {
-    // Builds the cmd line for sub process in solver mode
-    string cmd = "\"" + exe + "\" --solve " + inFile + " " + tmpFile;
+    // Open input and output files
+    HANDLE hIn  = CreateFileA(inFile.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE hOut = CreateFileA(tmpFile.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-    // Info for starting a process
+    // Make handles inheritable
+    SetHandleInformation(hIn, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+    SetHandleInformation(hOut, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+
+    if (hIn == INVALID_HANDLE_VALUE || hOut == INVALID_HANDLE_VALUE) {
+        cerr << "Failed to open input/output files\n";
+        return false;
+    }
+
+    // Setup process startup info with redirected stdin/stdout
     STARTUPINFOA si = { sizeof(si) };
-    PROCESS_INFORMATION pi; // handles IDs
+    si.dwFlags = STARTF_USESTDHANDLES;
+    si.hStdInput = hIn;
+    si.hStdOutput = hOut;
+    si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+
+    PROCESS_INFORMATION pi;
+
+    // Build command: just the solution exe, no args needed
+    string cmd = "\"" + exe + "\"";
 
     // Starts a process
     if (!CreateProcessA(
             NULL,
             const_cast<char*>(cmd.c_str()), // full cmd line
-            NULL, NULL, FALSE,
+            NULL, NULL, TRUE,
             CREATE_NO_WINDOW, NULL, NULL,
             &si, &pi)) {
         cerr << "Failed to start process\n";
@@ -102,12 +59,16 @@ bool runWithTimeout(const string &exe, const string &inFile, const string &tmpFi
         // Clean up
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
+        CloseHandle(hIn);
+        CloseHandle(hOut);
         return false; // Time limit exceeds
     }
 
     // Clean up
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
+    CloseHandle(hIn);
+    CloseHandle(hOut);
     return true; // Finished normally
 }
 
@@ -146,8 +107,7 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
         string outFile = "output/" + dir + "sol";
         string tmpFile = "temp_output.txt";
         
-        ifstream fout(outFile);
-        ifstream fin(inFile);
+        ifstream fout(outFile), fin(inFile);
         if (!fout.good() || !fin.good()) {
             cout << "Test Case not found. Skipping...\n\n";
             continue;
@@ -171,21 +131,49 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
     }
 }
 
-// argc: arg counts, argv: arg value
-// checker.exe (--solve inFile outFile)
-// ----[0]----  --[1]-- --[2]- --[3]-- : argv[]
-int main(int argc, char* argv[]) {
-    ios_base::sync_with_stdio(false); cin.tie(0);
+bool compileSolution(const string &problemCpp, const string &exeName) {
+    string cmd = "g++ \"" + problemCpp   + "\" -O2 -o \"" + exeName + "\"";
 
-    if (argc > 1 && string(argv[1]) == "--solve") {
-        // Solver mode
-        freopen(argv[2], "r", stdin);
-        freopen(argv[3], "w", stdout);
-        problem();
-        return 0;
+    STARTUPINFOA si = { sizeof(si) };
+    PROCESS_INFORMATION pi;
+
+    if (!CreateProcessA(
+            NULL,
+            const_cast<char*>(cmd.c_str()),
+            NULL, NULL, FALSE,
+            CREATE_NO_WINDOW, NULL, NULL,
+            &si, &pi)) {
+        cerr << "Failed to start compiler process\n";
+        return false;
     }
 
-    // Checker mode
-    string exePath = argv[0];
-    testCases("d67_q1b_wall_paint", 6, 20, exePath);
+    DWORD result = WaitForSingleObject(pi.hProcess, 10000); // 10 sec timeout
+
+    if (result == WAIT_TIMEOUT) {
+        TerminateProcess(pi.hProcess, 1);
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+        cerr << "Compilation timed out!\n";
+        return false;
+    }
+
+    DWORD exitCode;
+    GetExitCodeProcess(pi.hProcess, &exitCode);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    if (exitCode != 0) {
+        cerr << "Compilation failed!\n";
+        return false;
+    }
+
+    return true;
+}
+
+int main() {
+    string problemCpp = "../wallPaint.cpp";
+    string problemExe = "problem.exe";
+    if (!compileSolution(problemCpp, problemExe)) return 1;
+
+    testCases("d67_q1b_wall_paint", 6, 20, problemExe);
 }
