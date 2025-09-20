@@ -13,7 +13,64 @@
 using namespace std;
 
 void problem() {
-   
+   int n, m, x, c, d;
+    cin >> n >> m;
+
+    map<int, pair<int, int>> order;
+    map<int, set<pair<int, int>>> paint;
+    for (int i = 0; i < 2 * m; i++) {
+        cin >> x >> c >> d;
+        if (!d) {
+            order[c].first = x;
+        } else {
+            order[c].second = x;
+        }
+    }
+
+    for (auto &o : order) {
+        auto &[start, end] = o.second;
+        int layer = 0;
+        while (true) {
+            auto &paintLayer = paint[layer];
+
+            // Empty layer
+            if (!paintLayer.size()) {
+                paintLayer.insert({start, end});
+                break;
+            }
+
+            auto it = paintLayer.lower_bound({start, end});
+            if (it != paintLayer.begin()) it = prev(it);
+
+            // Going up the layers
+            if (it->first < start && it->second > end) {
+                layer++;
+                continue;
+            }
+
+            if (it->second < start) {
+                // check adjacent left
+                if (start - it->second == 1) {
+                    start = it->first;
+                    it = paintLayer.erase(it);
+                } else {
+                    it = next(it);
+                }
+
+                if (it == paintLayer.end() || it->first > end) {
+                    // check adjacent right
+                    if (it != paintLayer.end() && it->first - end == 1) {
+                        end = it->second;
+                        paintLayer.erase(it);
+                    }
+                    paintLayer.insert({start, end});
+                }
+            }
+            break;
+        }
+    }
+
+    cout << paint.size();
 }
 
 void answerCheck(ifstream &fout, vector<string> &answer) {
@@ -69,6 +126,31 @@ bool runWithTimeout(const string &exe, const string &inFile, const string &tmpFi
     return true; // Finished normally
 }
 
+vector<string> readOutput(const string &fileName) {
+    ifstream fin(fileName);
+    vector<string> result;
+    string word;
+    while (fin >> word) result.push_back(word);
+    return result;
+}
+
+void answerCheck(vector<string> &expected, vector<string> &answer) {
+    bool mismatch = false;
+    if (expected.size() != answer.size()) {
+        cout << "Size Mismatch!: " << answer.size() << " (Expected: " << expected.size() << ")\n";
+        return;
+    }
+
+    for (size_t i = 0; i < expected.size(); ++i) {
+        if (expected[i] != answer[i]) {
+            cout << "Mismatch!: " << answer[i] << " (Expected: " << expected[i] << ")\n";
+            mismatch = true;
+        }
+    }
+
+    if (!mismatch) cout << "Answer are correct!\n";
+}
+
 void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
     
     for (int i = caseStart; i <= caseEnd; i++) {
@@ -80,7 +162,8 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
         string tmpFile = "temp_output.txt";
         
         ifstream fout(outFile);
-        if (!fout.is_open()) {
+        ifstream fin(inFile);
+        if (!fout.good() || !fin.good()) {
             cout << "Test Case not found. Skipping...\n\n";
             continue;
         }
@@ -93,13 +176,10 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
             cout << "Time limit exceeded. Skipping...\n\n";
             continue;
         }
-
-        ifstream ansFile(tmpFile);
-        vector<string> answer;
-        string word;
-        while (ansFile >> word) answer.push_back(word);
         
-        answerCheck(fout, answer);
+        vector<string> expected = readOutput(outFile);
+        vector<string> answer = readOutput(tmpFile);
+        answerCheck(expected, answer);
         
         chrono::duration<double> duration = end - start;
         cout << "Execution time: " << duration.count() << " s\n\n";
