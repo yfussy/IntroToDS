@@ -1,14 +1,7 @@
 q1
 Wall Paint ***
-Stack by Vector
-Stack by Vector 2
-
-midterm
-Auction
 
 q2
-Pair GTE
-Change Data
 Is reverse?
 Vector Compress
 Wasted Space
