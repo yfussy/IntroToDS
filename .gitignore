@@ -3,4 +3,5 @@
 *.exe
 *.in
 *.sol
+test.cpp
 temp_output.txt
