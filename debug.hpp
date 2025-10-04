@@ -12,6 +12,8 @@
 #include <vector>
 #include <list>
 #include <deque>
+#include <stack>
+#include <queue>
 
 using namespace std;
 
@@ -37,9 +39,17 @@ struct is_container<T, void_t<
     decltype(declval<T>().end())
 >> : integral_constant<bool, !is_string<T>::value> {};
 
+// is_adapter
+template <typename T>
+struct is_adapter : bool_constant<
+    is_specialization_of<queue, T>::value ||
+    is_specialization_of<stack, T>::value ||
+    is_specialization_of<priority_queue, T>::value
+> {};
+
 // Generic
 template <typename T>
-enable_if_t<!is_container<T>::value && !is_pair<T>::value, void>
+enable_if_t<!is_container<T>::value && !is_pair<T>::value && !is_adapter<T>::value, void>
 printVar(const T& val) {
     cout << val;
 }
@@ -73,6 +83,33 @@ void printVar (const map<K, V>& m) {
         cout << ": ";
         printVar(it->second);
         if (next(it) != m.end()) cout << endl;
+    }
+}
+
+// Adapters (queue, stack, priority_queue)
+template <typename Adapter>
+enable_if_t<is_adapter<Adapter>::value, void>
+printVar(Adapter a) {
+    // Queue
+    if constexpr (is_specialization_of<std::queue, Adapter>::value) {
+        bool first = true;
+        while (!a.empty()) {
+            if (!first) std::cout << ", ";
+            printVar(a.front());
+            a.pop();
+            first = false;
+        }
+    } 
+
+    // Stack & Priority Queue
+    else if constexpr (is_specialization_of<std::stack, Adapter>::value || is_specialization_of<std::priority_queue, Adapter>::value) {
+        bool first = true;
+        while (!a.empty()) {
+            if (!first) std::cout << ", ";
+            printVar(a.top());
+            a.pop();
+            first = false;
+        }
     }
 }
 
