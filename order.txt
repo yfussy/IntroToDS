@@ -2,18 +2,28 @@ q1
 Wall Paint ***
 
 q2
-Is reverse?
-Vector Compress
-Wasted Space
-Iterator Check
-Vector Mirror
-Vector Range Erase
-Vector less
-Vector Partial Sort
-Vector Multi Unique
+Vector Some Move *
+Vector No Move *
 
 q3
 Queue Check
+Queue At
+Queue Free Space
+Queue Remove Many
+Append
+Queue Min Element
+Queue Back to Front
+Queue Move to Back
+Queue Move to Front
+Multi Count
+Split Queue
+Queue Equality
+Queue to Vector
+Queue Block Insert
+Queue Reverse
+Queue Vertical Split
+Queue Total Reverse
+Queue Block Remove *
 
 final
 Digital Wallet
