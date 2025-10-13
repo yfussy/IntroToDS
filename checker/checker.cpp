@@ -9,32 +9,34 @@
 #include <chrono>
 #include <sstream>
 #include <windows.h>
+#include <psapi.h>
 
 using namespace std;
 
-bool runWithTimeout(const string &exe, const string &inFile, const string &tmpFile, int timeoutMs) {
+enum RunResult { OK, TLE, MLE, HANG, COMPILE_ERR, UNKNOWN };
+
+RunResult runWithTimeout(const string &exe, const string &inFile, const string &tmpFile, int timeoutMs, size_t memoryLimitMB = 512) {
     // Open input and output files
     HANDLE hIn  = CreateFileA(inFile.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    HANDLE hOut = INVALID_HANDLE_VALUE;
+    if (hIn == INVALID_HANDLE_VALUE) {
+        cerr << "Failed to open input file\n";
+        return UNKNOWN;
+    }
 
+    HANDLE hOut = INVALID_HANDLE_VALUE;
     for (int attempt = 0; attempt < 5 && hOut == INVALID_HANDLE_VALUE; ++attempt) {
         hOut = CreateFileA(tmpFile.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
         if (hOut == INVALID_HANDLE_VALUE) Sleep(50); // retry after a short delay
     }
+
     if (hOut == INVALID_HANDLE_VALUE) {
         cerr << "Failed to open tmp file after retries: " << GetLastError() << "\n";
-        return false;
+        return UNKNOWN;
     }
 
     // Make handles inheritable
     SetHandleInformation(hIn, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
     SetHandleInformation(hOut, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-
-    if (hIn == INVALID_HANDLE_VALUE || hOut == INVALID_HANDLE_VALUE) {
-        cerr << "Failed to open " << (hIn == INVALID_HANDLE_VALUE ? "input" : "tmp")  << " file\n";
-        DeleteFileA(tmpFile.c_str());
-        return false;
-    }
 
     // Setup process startup info with redirected stdin/stdout
     STARTUPINFOA si = { sizeof(si) };
@@ -44,8 +46,6 @@ bool runWithTimeout(const string &exe, const string &inFile, const string &tmpFi
     si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
 
     PROCESS_INFORMATION pi;
-
-    // Build command: just the solution exe, no args needed
     string cmd = "\"" + exe + "\"";
 
     // Starts a process
@@ -56,30 +56,83 @@ bool runWithTimeout(const string &exe, const string &inFile, const string &tmpFi
             CREATE_NO_WINDOW, NULL, NULL,
             &si, &pi)) {
         cerr << "Failed to start process\n";
-        return false;
-    }
-
-    // Wait for the process to finish
-    DWORD result = WaitForSingleObject(pi.hProcess, timeoutMs); // timeoutMs: time willing to wait
-
-    // If time is out, terminate the process
-    if (result == WAIT_TIMEOUT) {
-        TerminateProcess(pi.hProcess, 1);
-        
-        // Clean up
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
         CloseHandle(hIn);
         CloseHandle(hOut);
-        return false; // Time limit exceeds
+        return COMPILE_ERR;
     }
 
-    // Clean up
+    DWORD waitResult;
+    RunResult result = OK;
+    SIZE_T memMB;
+    auto start = chrono::high_resolution_clock::now();
+
+    // Poll every 100 ms to detect resource overuse
+    while ((waitResult = WaitForSingleObject(pi.hProcess, 100)) == WAIT_TIMEOUT) {
+        // Memory Limit Exceeded
+        PROCESS_MEMORY_COUNTERS_EX memInfo;
+        if (GetProcessMemoryInfo(pi.hProcess, (PROCESS_MEMORY_COUNTERS*)&memInfo, sizeof(memInfo))) {
+            memMB = memInfo.WorkingSetSize / (1024 * 1024);
+            if (memMB > memoryLimitMB) {
+                result = MLE;
+                TerminateProcess(pi.hProcess, 1);
+                break;
+            }
+        }
+
+        // Time Limit Exceeded
+        auto now = chrono::high_resolution_clock::now();
+        if (chrono::duration_cast<chrono::milliseconds>(now - start).count() > timeoutMs) {
+            result = TLE;
+            TerminateProcess(pi.hProcess, 1);
+            break;
+        }
+    }
+
+    // If process finished normally
+    if (waitResult != WAIT_TIMEOUT && result == OK) result = OK;
+
+    // Collect diagnostic info
+    FILETIME createTime, exitTime, kernelTime, userTime;
+    GetProcessTimes(pi.hProcess, &createTime, &exitTime, &kernelTime, &userTime);
+
+    ULARGE_INTEGER uKernel, uUser;
+    uKernel.LowPart = kernelTime.dwLowDateTime;
+    uKernel.HighPart = kernelTime.dwHighDateTime;
+    uUser.LowPart = userTime.dwLowDateTime;
+    uUser.HighPart = userTime.dwHighDateTime;
+    double cpuSeconds = (uKernel.QuadPart + uUser.QuadPart) / 1e7;
+
+    PROCESS_MEMORY_COUNTERS_EX memInfo;
+    GetProcessMemoryInfo(pi.hProcess, (PROCESS_MEMORY_COUNTERS*)&memInfo, sizeof(memInfo));
+    SIZE_T peakMB = memInfo.PeakWorkingSetSize / (1024 * 1024);
+
+    // Determine likely cause if timeout but low CPU
+    if (result == TLE && cpuSeconds < (timeoutMs / 1000.0) * 0.3) {
+        result = HANG;
+    }
+
+    TerminateProcess(pi.hProcess, 1);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     CloseHandle(hIn);
     CloseHandle(hOut);
-    return true; // Finished normally
+
+    if (result != OK) {
+        cout << fixed;
+        cout.precision(3);
+        cout << "CPU Time: " << cpuSeconds << " s, Peak Memory: " << peakMB << " MB\n";
+    
+        switch (result) {
+            case TLE:  cout << "Time Limit Exceeded (CPU busy). "; break;
+            case HANG: cout << "Possibly deadlock or waiting for input. "; break;
+            case MLE:  cout << "Memory Limit Exceeded (" << memMB << " / " << memoryLimitMB << " MB). "; break;
+            default:   cout << "Unknown termination reason. "; break;
+        }
+
+        cout << "Skipping...\n\n";
+    }
+
+    return result;
 }
 
 vector<string> readOutput(const string &fileName) {
@@ -124,13 +177,10 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
         }
 
         auto start = chrono::high_resolution_clock::now();
-        bool ok = runWithTimeout(exePath, inFile, tmpFile, 1600);
+        bool ok = (runWithTimeout(exePath, inFile, tmpFile, 1600) == OK);
         auto end = chrono::high_resolution_clock::now();
 
-        if (!ok) {
-            cout << "Time limit exceeded. Skipping...\n\n";
-            continue;
-        }
+        if (!ok) continue; 
         
         vector<string> expected = readOutput(outFile);
         vector<string> answer = readOutput(tmpFile);
@@ -181,9 +231,9 @@ bool compileSolution(const string &problemCpp, const string &exeName) {
 }
 
 int main() {
-    string problemCpp = "../wallPaint.cpp";
+    string problemCpp = "../Q2/vectorSomeMove/main.cpp";
     string problemExe = "problem.exe";
     if (!compileSolution(problemCpp, problemExe)) return 1;
 
-    testCases("d67_q1b_wall_paint", 6, 20, problemExe);
+    testCases("d65_q2b_some_move", 1, 10, problemExe);
 }
