@@ -3,7 +3,6 @@ Wall Paint ***
 
 q2
 Vector Some Move *
-Vector No Move *
 
 q3
 Queue Check
