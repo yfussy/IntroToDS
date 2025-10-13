@@ -15,14 +15,24 @@ using namespace std;
 bool runWithTimeout(const string &exe, const string &inFile, const string &tmpFile, int timeoutMs) {
     // Open input and output files
     HANDLE hIn  = CreateFileA(inFile.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    HANDLE hOut = CreateFileA(tmpFile.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE hOut = INVALID_HANDLE_VALUE;
+
+    for (int attempt = 0; attempt < 5 && hOut == INVALID_HANDLE_VALUE; ++attempt) {
+        hOut = CreateFileA(tmpFile.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (hOut == INVALID_HANDLE_VALUE) Sleep(50); // retry after a short delay
+    }
+    if (hOut == INVALID_HANDLE_VALUE) {
+        cerr << "Failed to open tmp file after retries: " << GetLastError() << "\n";
+        return false;
+    }
 
     // Make handles inheritable
     SetHandleInformation(hIn, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
     SetHandleInformation(hOut, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
 
     if (hIn == INVALID_HANDLE_VALUE || hOut == INVALID_HANDLE_VALUE) {
-        cerr << "Failed to open input/output files\n";
+        cerr << "Failed to open " << (hIn == INVALID_HANDLE_VALUE ? "input" : "tmp")  << " file\n";
+        DeleteFileA(tmpFile.c_str());
         return false;
     }
 
@@ -109,7 +119,7 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
         
         ifstream fout(outFile), fin(inFile);
         if (!fout.good() || !fin.good()) {
-            cout << "Test Case not found. Skipping...\n\n";
+            cout << "Test Case not found. Skipping... " << (!fin.good() ? "(input)\n\n" : "(output)\n\n");
             continue;
         }
 
