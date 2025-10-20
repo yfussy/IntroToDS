@@ -150,13 +150,18 @@ void answerCheck(vector<string> &expected, vector<string> &answer) {
         return;
     }
 
+    size_t count = 0, limit = 30;
     for (size_t i = 0; i < expected.size(); ++i) {
         if (expected[i] != answer[i]) {
-            cout << "Mismatch!: " << answer[i] << " (Expected: " << expected[i] << ")\n";
+            if (count < limit) cout << "Mismatch!: " << answer[i] << " (Expected: " << expected[i] << ")\n";
+            ++count;
             mismatch = true;
         }
     }
-
+    if (count > limit) {
+        cout << "And other " << count - limit << " mismatches..." << endl;
+    }
+    
     if (!mismatch) cout << "Answer are correct!\n";
 }
 
