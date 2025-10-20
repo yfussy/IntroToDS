@@ -166,8 +166,8 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
         cout << "Test Case: " << i << endl;
         string dir = name + "." + to_string(i) + ".";
         
-        string inFile  = "input/"  + dir + "in";
-        string outFile = "output/" + dir + "sol";
+        string inFile  = "testcase/"  + dir + "in";
+        string outFile = "testcase/" + dir + "sol";
         string tmpFile = "temp_output.txt";
         
         ifstream fout(outFile), fin(inFile);
