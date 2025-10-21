@@ -5,8 +5,6 @@ q2
 Vector Some Move *
 
 q3
-Append
-Queue Min Element
 Queue Back to Front
 Queue Move to Back
 Queue Move to Front
