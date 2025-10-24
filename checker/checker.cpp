@@ -174,7 +174,7 @@ void readyToDelete(string name) {
     cout << name << " testcases are ready to be deleted!";
 }
 
-void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
+void testCases(string name, int caseStart, int caseEnd, const string &exePath, int timeoutMs) {
     
     int scores = 0;
     int notFound = 0;
@@ -194,7 +194,7 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
         }
 
         auto start = chrono::high_resolution_clock::now();
-        bool ok = (runWithTimeout(exePath, inFile, tmpFile, 1600) == OK);
+        bool ok = (runWithTimeout(exePath, inFile, tmpFile, timeoutMs) == OK);
         auto end = chrono::high_resolution_clock::now();
         
         if (!ok) continue; 
