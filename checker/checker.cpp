@@ -143,11 +143,11 @@ vector<string> readOutput(const string &fileName) {
     return result;
 }
 
-void answerCheck(vector<string> &expected, vector<string> &answer) {
-    bool mismatch = false;
+bool answerCheck(vector<string> &expected, vector<string> &answer) {
+    bool status = true;
     if (expected.size() != answer.size()) {
         cout << "Size Mismatch!: " << answer.size() << " (Expected: " << expected.size() << ")\n";
-        return;
+        return false;
     }
 
     size_t count = 0, limit = 30;
@@ -155,18 +155,29 @@ void answerCheck(vector<string> &expected, vector<string> &answer) {
         if (expected[i] != answer[i]) {
             if (count < limit) cout << "Mismatch!: " << answer[i] << " (Expected: " << expected[i] << ")\n";
             ++count;
-            mismatch = true;
+            status = false;
         }
     }
     if (count > limit) {
         cout << "And other " << count - limit << " mismatches..." << endl;
     }
     
-    if (!mismatch) cout << "Answer are correct!\n";
+    if (status) cout << "Answer are correct!\n";
+
+    return status;
+}
+
+void readyToDelete(string name) {
+    string outDir = "recentTestcases.txt";
+    ofstream fout(outDir);
+    fout << name;
+    cout << name << " testcases are ready to be deleted!";
 }
 
 void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
     
+    int scores = 0;
+    int notFound = 0;
     for (int i = caseStart; i <= caseEnd; i++) {
         cout << "Test Case: " << i << endl;
         string dir = name + "." + to_string(i) + ".";
@@ -178,22 +189,25 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath) {
         ifstream fout(outFile), fin(inFile);
         if (!fout.good() || !fin.good()) {
             cout << "Test Case not found. Skipping... " << (!fin.good() ? "(input)\n\n" : "(output)\n\n");
+            ++notFound;
             continue;
         }
 
         auto start = chrono::high_resolution_clock::now();
         bool ok = (runWithTimeout(exePath, inFile, tmpFile, 1600) == OK);
         auto end = chrono::high_resolution_clock::now();
-
+        
         if (!ok) continue; 
         
         vector<string> expected = readOutput(outFile);
         vector<string> answer = readOutput(tmpFile);
-        answerCheck(expected, answer);
+        if (answerCheck(expected, answer)) scores++;
         
         chrono::duration<double> duration = end - start;
         cout << "Execution time: " << duration.count() << " s\n\n";
     }
+    cout << "Testcase Passed: " << scores << "/" << caseEnd - caseStart + 1 - notFound << endl;
+    if (scores == caseEnd - caseStart + 1) readyToDelete(name);
 }
 
 bool compileSolution(const string &problemCpp, const string &exeName) {
@@ -236,9 +250,9 @@ bool compileSolution(const string &problemCpp, const string &exeName) {
 }
 
 int main() {
-    string problemCpp = "../Q2/vectorSomeMove/main.cpp";
+    string problemCpp = "../Q3/multiCount/main.cpp";
     string problemExe = "problem.exe";
     if (!compileSolution(problemCpp, problemExe)) return 1;
 
-    testCases("d65_q2b_some_move", 1, 10, problemExe);
+    testCases("d62_q2a_multi_count", 6, 12, problemExe);
 }
