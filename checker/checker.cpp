@@ -184,7 +184,7 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath, i
         
         string inFile  = "testcase/"  + dir + "in";
         string outFile = "testcase/" + dir + "sol";
-        string tmpFile = "temp_output.txt";
+        string tmpFile = "temp/temp_output.txt";
         
         ifstream fout(outFile), fin(inFile);
         if (!fout.good() || !fin.good()) {
