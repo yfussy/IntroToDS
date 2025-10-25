@@ -254,5 +254,6 @@ int main() {
     string problemExe = "problem.exe";
     if (!compileSolution(problemCpp, problemExe)) return 1;
 
-    testCases("d62_q2a_multi_count", 6, 12, problemExe);
+    int timeoutMs = 1000;
+    testCases("da67_m_queue_block_insert", 1, 20, problemExe, timeoutMs);
 }
