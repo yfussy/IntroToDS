@@ -23,7 +23,7 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 os.makedirs(DOWNLOAD_TEMP_DIR, exist_ok=True)
 
 load_dotenv()
-USERNAME = os.getenv("USERNAME")
+NAME = os.getenv("NAME")
 PASSWORD = os.getenv("PASSWORD")
 
 # === CHROME OPTIONS ===
@@ -58,7 +58,7 @@ def wait_for_downloads(folder, timeout=60):
 # === 1. LOGIN ===
 driver.get(LOGIN_URL)
 time.sleep(2)
-driver.find_element(By.ID, "login").send_keys(USERNAME)
+driver.find_element(By.ID, "login").send_keys(NAME)
 driver.find_element(By.ID, "password").send_keys(PASSWORD)
 driver.find_element(By.NAME, "commit").click()
 time.sleep(3)
