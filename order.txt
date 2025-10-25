@@ -5,11 +5,23 @@ q2
 Vector Some Move *
 
 q3
-Queue Block Insert
 Queue Reverse
 Queue Vertical Split
 Queue Total Reverse
 Queue Block Remove *
+Heap Node Relation
+Heap Descendant
+Heap Befor Node
+Heap Level
+Heap Ordering
+Heap Height
+Heap Equality
+Heap Change Value
+Heap Find
+Heap Ordering 2
+Heap Erase
+Heap K-th
+Rank in Heap
 
 final
 Digital Wallet
