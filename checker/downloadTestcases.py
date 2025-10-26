@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 # === SETTINGS ===
 BASE_URL = "https://grader.nattee.net"
 LOGIN_URL = BASE_URL
-PROBLEM_NUM = "242"
+PROBLEM_NUM = "473"
 PROBLEM_URL = f"{BASE_URL}/testcases/show_problem/{PROBLEM_NUM}"
 
 
@@ -28,7 +28,7 @@ PASSWORD = os.getenv("PASSWORD")
 
 # === CHROME OPTIONS ===
 chrome_options = Options()
-# chrome_options.add_argument("--headless=new")  # modern headless
+chrome_options.add_argument("--headless=new")  # modern headless
 chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-gpu")
@@ -58,16 +58,21 @@ def wait_for_downloads(folder, timeout=60):
 # === 1. LOGIN ===
 driver.get(LOGIN_URL)
 time.sleep(2)
+print("Waiting for login page...")
 driver.find_element(By.ID, "login").send_keys(NAME)
 driver.find_element(By.ID, "password").send_keys(PASSWORD)
+print("logging in...")
 driver.find_element(By.NAME, "commit").click()
+print("logged in!")
 time.sleep(3)
 
 # === 2. GO TO PROBLEM PAGE ===
+print("waiting for main page...")
 driver.get(PROBLEM_URL)
 time.sleep(2)
 
 # === 3. EXTRACT ALL DOWNLOAD BUTTONS ===
+print("waiting for testcase page...")
 download_buttons = driver.find_elements(By.CSS_SELECTOR, "a.btn.btn-info.btn-sm")
 print(f"Found {len(download_buttons)} download buttons.")
 
