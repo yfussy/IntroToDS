@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 # === SETTINGS ===
 BASE_URL = "https://grader.nattee.net"
 LOGIN_URL = BASE_URL
-PROBLEM_NUM = "186"
+PROBLEM_NUM = "243"
 PROBLEM_URL = f"{BASE_URL}/testcases/show_problem/{PROBLEM_NUM}"
 
 
@@ -56,19 +56,20 @@ def wait_for_downloads(folder, timeout=60):
     return False
 
 # === 1. LOGIN ===
-driver.get(LOGIN_URL)
 print("Waiting for login page...")
+driver.get(LOGIN_URL)
+print("logging in...")
 time.sleep(2)
 driver.find_element(By.ID, "login").send_keys(NAME)
 driver.find_element(By.ID, "password").send_keys(PASSWORD)
-print("logging in...")
 driver.find_element(By.NAME, "commit").click()
 print("logged in!")
 time.sleep(3)
 
 # === 2. GO TO PROBLEM PAGE ===
-driver.get(PROBLEM_URL)
 print("waiting for main page...")
+driver.get(PROBLEM_URL)
+print("page loaded!")
 time.sleep(2)
 
 # === 3. EXTRACT ALL DOWNLOAD BUTTONS ===
