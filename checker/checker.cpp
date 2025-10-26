@@ -207,7 +207,7 @@ void testCases(string name, int caseStart, int caseEnd, const string &exePath, i
         cout << "Execution time: " << duration.count() << " s\n\n";
     }
     cout << "Testcase Passed: " << scores << "/" << caseEnd - caseStart + 1 - notFound << endl;
-    if (scores == caseEnd - caseStart + 1) readyToDelete(name);
+    if (scores == caseEnd - caseStart + 1 - notFound) readyToDelete(name);
 }
 
 bool compileSolution(const string &problemCpp, const string &exeName) {
