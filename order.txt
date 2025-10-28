@@ -4,11 +4,5 @@ Wall Paint ***
 q2
 Vector Some Move *
 
-q3
-Heap Ordering 2
-Heap Erase
-Heap K-th
-Rank in Heap
-
 final
 Digital Wallet
