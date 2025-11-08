@@ -4,5 +4,35 @@ Wall Paint ***
 q2
 Vector Some Move *
 
+q3
+Heap Check
+K-ary Heap
+K-ary Heap Height
+Custom Order
+K-ary Heap Check
+Heap Node Relation 2
+
+q4
+Zuma
+List Reverse
+List Replace
+List Extract
+List Remove All
+List Merge
+List Split
+Shift
+Playlist Management
+List Block Swap
+List check
+Split List
+Left Child Right Sibling
+ต้นไม้เหมือน
+Count Unary
+Leaves Count
+Subtree Extract
+Imbalance
+Hash Max Bucket
+Hash Longest Find
+
 final
 Digital Wallet
