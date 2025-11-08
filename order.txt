@@ -4,14 +4,6 @@ Wall Paint ***
 q2
 Vector Some Move *
 
-q3
-Heap Check
-K-ary Heap
-K-ary Heap Height
-Custom Order
-K-ary Heap Check
-Heap Node Relation 2
-
 q4
 Zuma
 List Reverse
