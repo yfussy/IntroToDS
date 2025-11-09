@@ -5,13 +5,6 @@ q2
 Vector Some Move *
 
 q4
-Zuma
-List Reverse
-List Replace
-List Extract
-List Remove All
-List Merge
-List Split
 Shift
 Playlist Management
 List Block Swap
@@ -19,10 +12,19 @@ List check
 Split List
 Left Child Right Sibling
 ต้นไม้เหมือน
+Tree Leaves Depth
+BST at level
 Count Unary
+BST Lowest Common Ancestor
+Map Key in Range
+Shallowest Leaf
 Leaves Count
+Optimal Binary Search Tree
+BST Furthest Distance 
+BST Trim
 Subtree Extract
 Imbalance
+BST Split
 Hash Max Bucket
 Hash Longest Find
 
