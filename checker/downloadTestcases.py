@@ -14,8 +14,8 @@ import json
 BASE_URL = "https://grader.nattee.net"
 LOGIN_URL = BASE_URL
 
-with open("config.json") as f:
-    config = json.load(f)
+with open("config.json", "r") as fin:
+    config = json.load(fin)
 PROBLEM_NUM = config["py"]["problem_num"]
 
 PROBLEM_URL = f"{BASE_URL}/testcases/show_problem/{PROBLEM_NUM}"
@@ -122,3 +122,10 @@ time.sleep(5)  # adjust if files are large
 
 driver.quit()
 print("All downloads finished and Chrome closed!")
+
+config["cpp"]["test_case"] = f.split(".")[0]
+
+with open("config.json", "w") as fout:
+    json.dump(config, fout, indent=2)
+    
+print("Downloaded testcases recorded in config.json!")
