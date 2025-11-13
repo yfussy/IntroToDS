@@ -8,11 +8,16 @@ import time
 import shutil
 from urllib.parse import urlparse
 from dotenv import load_dotenv
+import json
 
 # === SETTINGS ===
 BASE_URL = "https://grader.nattee.net"
 LOGIN_URL = BASE_URL
-PROBLEM_NUM = "243"
+
+with open("config.json") as f:
+    config = json.load(f)
+PROBLEM_NUM = config["py"]["problem_num"]
+
 PROBLEM_URL = f"{BASE_URL}/testcases/show_problem/{PROBLEM_NUM}"
 
 

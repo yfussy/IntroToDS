@@ -10,8 +10,11 @@
 #include <sstream>
 #include <windows.h>
 #include <psapi.h>
+#include <fstream>
+#include "json.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
 enum RunResult { OK, TLE, MLE, HANG, COMPILE_ERR, UNKNOWN };
 
@@ -250,10 +253,16 @@ bool compileSolution(const string &problemCpp, const string &exeName) {
 }
 
 int main() {
-    string problemCpp = "../Q3/multiCount/main.cpp";
+    ifstream file("config.json");
+    json config;
+    file >> config;
+
+    string problemCpp = config["cpp"]["path"];
+    string test_case = config["cpp"]["test_case"];
+
     string problemExe = "problem.exe";
     if (!compileSolution(problemCpp, problemExe)) return 1;
 
     int timeoutMs = 1000;
-    testCases("da67_m_queue_block_insert", 1, 20, problemExe, timeoutMs);
+    testCases(test_case, 1, 20, problemExe, timeoutMs);
 }

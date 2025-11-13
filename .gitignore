@@ -7,3 +7,5 @@ test.cpp
 temp_output.txt
 recentTestcases.txt
 *.env
+config.json
+json.hpp
