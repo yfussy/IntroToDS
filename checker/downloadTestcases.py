@@ -13,15 +13,16 @@ import json
 # === SETTINGS ===
 BASE_URL = "https://grader.nattee.net"
 LOGIN_URL = BASE_URL
+ROOT_DIR = os.path.dirname(__file__)
 
-with open("config.json", "r") as fin:
+CONFIG_DIR = os.path.join(ROOT_DIR, "config.json")
+with open(CONFIG_DIR, "r") as fin:
     config = json.load(fin)
 PROBLEM_NUM = config["py"]["problem_num"]
 
 PROBLEM_URL = f"{BASE_URL}/testcases/show_problem/{PROBLEM_NUM}"
 
 
-ROOT_DIR = os.path.dirname(__file__)
 DOWNLOAD_DIR = os.path.join(ROOT_DIR, "testcase")
 DOWNLOAD_TEMP_DIR = os.path.join(ROOT_DIR, "temp")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -125,7 +126,7 @@ print("All downloads finished and Chrome closed!")
 
 config["cpp"]["test_case"] = f.split(".")[0]
 
-with open("config.json", "w") as fout:
+with open(CONFIG_DIR, "w") as fout:
     json.dump(config, fout, indent=2)
     
 print("Downloaded testcases recorded in config.json!")
