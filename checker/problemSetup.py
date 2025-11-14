@@ -72,32 +72,36 @@ time.sleep(3)
 
 # === 2. GET THE PROBLEM FILES ===
 print(f"Extracting problem: {PROBLEM_TARGET}")
-tbody = driver.find_element(By.CSS_SELECTOR, 'tbody[data-controller="problem-name"]')
-rows = tbody.find_elements(By.TAG_NAME, "tr")
-file_link = None
+problem_cells = driver.find_elements(
+    By.CSS_SELECTOR,
+    'tbody[data-controller="problem-name"] tr td:nth-of-type(2)'
+)
 
-for row in rows:
-    td = row.find_element(By.XPATH, ".//td[.//strong]")
-    problem_name = td.find_element(By.TAG_NAME, "strong").text.strip().lower().replace(" ", "")
+for td in problem_cells:
+    strong = td.find_element(By.TAG_NAME, "strong")
+    problem_name = strong.text.strip().lower().replace(" ", "")
+
     if problem_name == PROBLEM_TARGET.lower().strip().replace(" ", ""):
-        # extract testcase and problem num
-        testcase_div = td.find_element(By.CSS_SELECTOR, "div.text-muted.font-monospace")
-        testcase_name = testcase_div.text.strip()
-
-        read_a = td.find_element(By.XPATH, ".//a[contains(text(),'Read')]")
-        read_link = read_a.get_attribute("href")
+        # extract testcase name
+        testcase_name = td.find_element(
+            By.CSS_SELECTOR,
+            "div.text-muted.font-monospace"
+        ).text.strip()
+        
+        # extract problem num
+        read_link = td.find_element(
+            By.CSS_SELECTOR,
+            'a[href*="download/statement"]'
+        ).get_attribute("href")
         problem_number = int(read_link.split("/")[4])
 
-        # extract file link
-        try: 
-            link_element = td.find_element(
-                By.XPATH,
-                './/a[contains(normalize-space(.), "File")]'
-            )
-            file_link = link_element.get_attribute("href")
-        except:
-            file_link = None
-        
+        # Try to get file link
+        file_elems = td.find_elements(
+            By.CSS_SELECTOR,
+            'a[href*="download/attachment"]'
+        )
+
+        file_link = file_elems[0].get_attribute("href") if file_elems else None
         break
 
 print(f"Testcase name: {testcase_name}")
