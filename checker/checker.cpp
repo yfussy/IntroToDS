@@ -5,6 +5,7 @@
 #include <map>
 #include <queue>
 #include <fstream>
+#include <filesystem>
 #include <algorithm>
 #include <chrono>
 #include <sstream>
@@ -15,6 +16,7 @@
 
 using namespace std;
 using json = nlohmann::json;
+namespace fs = std::filesystem;
 
 enum RunResult { OK, TLE, MLE, HANG, COMPILE_ERR, UNKNOWN };
 
@@ -171,11 +173,12 @@ bool answerCheck(vector<string> &expected, vector<string> &answer) {
 }
 
 void readyToDelete(string name) {
+    // Edit config.json
     ifstream fin("config.json");
     json config;
     fin >> config;
     fin.close();
-    
+
     config["cpp"]["delete_testcase"] = name;
     
     ofstream fout("config.json");
@@ -183,6 +186,45 @@ void readyToDelete(string name) {
     fout.close();
 
     cout << name << " testcases are ready to be deleted!";
+
+    // Edit order.txt
+    fs::path filePath("../order.txt");
+    ifstream in(filePath);
+
+    vector<string> lines;
+    string line;
+    while (getline(in, line)) {
+        lines.push_back(line);
+    }
+    in.close();
+
+    auto getTargetName = [](const fs::path& p) -> std::string {
+        fs::path pathObj(p);
+
+        if (pathObj.has_extension()) {
+            // It's a file → use parent folder
+            return pathObj.parent_path().filename().string();
+        } else {
+            // It's a folder
+            return pathObj.filename().string();
+        }
+    };
+
+    string target = getTargetName("../Q4/BSTFurthestDistance/main.cpp");
+    
+    lines.erase(
+        remove_if(lines.begin(), lines.end(), [&](const string& s) {
+            return s.find(target) != string::npos;
+        }),
+        lines.end()
+    );
+
+    // Write back
+    ofstream out(filePath);
+    for (size_t i = 0; i < lines.size(); ++i) {
+        out << lines[i];
+        if (i + 1 != lines.size()) out << "\n"; // only add newline between lines
+    }
 }
 
 void testCases(string name, int caseStart, int caseEnd, const string &exePath, int timeoutMs) {
