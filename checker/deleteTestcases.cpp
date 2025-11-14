@@ -1,18 +1,20 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include "json.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 namespace fs = filesystem;
 
 int main() {
-    string recentTestcases = "recentTestcases.txt";
-    string folderName = "testcase";
-
-    ifstream fin(recentTestcases);
-    string testcase;
-    fin >> testcase;
+    ifstream fin("config.json");
+    json config;
+    fin >> config;
     fin.close();
+
+    string testcase = config["cpp"]["delete_testcase"];
+    string folderName = "testcase";
 
     if (testcase.empty()) {
         cerr << "Error: testcases name is empty";

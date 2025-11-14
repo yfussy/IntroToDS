@@ -171,9 +171,17 @@ bool answerCheck(vector<string> &expected, vector<string> &answer) {
 }
 
 void readyToDelete(string name) {
-    string outDir = "recentTestcases.txt";
-    ofstream fout(outDir);
-    fout << name;
+    ifstream fin("config.json");
+    json config;
+    fin >> config;
+    fin.close();
+    
+    config["cpp"]["delete_testcase"] = name;
+    
+    ofstream fout("config.json");
+    fout << config.dump(2);
+    fout.close();
+
     cout << name << " testcases are ready to be deleted!";
 }
 
