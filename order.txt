@@ -5,8 +5,6 @@ Q2
 Vector Some Move *
 
 Q4
-BSTFurthestDistance
-BSTTrim
 subtreeExtract
 imbalance
 BSTSplit
