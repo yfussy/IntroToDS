@@ -79,8 +79,9 @@ problem_cells = driver.find_elements(
 
 for td in problem_cells:
     strong = td.find_element(By.TAG_NAME, "strong")
-    problem_name = strong.text.strip().lower().replace(" ", "")
-
+    problem_name = problem_name = strong.parent.execute_script(
+        "return arguments[0].childNodes[0].textContent.trim();", strong
+    ).strip().lower().replace(" ", "")
     if problem_name == PROBLEM_TARGET.lower().strip().replace(" ", ""):
         # extract testcase name
         testcase_name = td.find_element(
