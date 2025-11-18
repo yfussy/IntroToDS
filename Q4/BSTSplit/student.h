@@ -9,40 +9,39 @@ template <typename KeyT,
 CP::map_bst<KeyT,MappedT,CompareT> CP::map_bst<KeyT,MappedT,CompareT>::split(KeyT val) {
     CP::map_bst<KeyT,MappedT,CompareT> result;
 
+    if (mRoot == NULL) return result;
+
     node* cur = mRoot;
     node* L = NULL;
     node* R = NULL;
-    node* L_tail = NULL;
-    node* R_tail = NULL;
-    int count = 0;
+    node* Ltail = NULL;
+    node* Rtail = NULL;
+
     while (cur != NULL) {
-      std::cout << ++count << std::endl;
         if (cur->data.first < val) {
             node* nxt = cur->right;
             cur->right = NULL;     // detach
-            nxt->parent = NULL;
-            // if (nxt) nxt->parent = NULL;
+            if (nxt != NULL) nxt->parent = NULL;
 
             if (L == NULL) L = cur;
             else {
-              L_tail->right = cur;
-              cur->parent = L_tail;
+              Ltail->right = cur;
+              cur->parent = Ltail;
             }
-            L_tail = cur;
+            Ltail = cur;
 
             cur = nxt;
         } else {
             node* nxt = cur->left;
             cur->left = NULL;      // detach
-            nxt->parent = NULL;
-            // if (nxt) nxt->parent = NULL;
+            if (nxt != NULL) nxt->parent = NULL;
 
             if (R == NULL) R = cur;
             else {
-              R_tail->left = cur;
-              cur->parent = R_tail;
+              Rtail->left = cur;
+              cur->parent = Rtail;
             }
-            R_tail = cur;
+            Rtail = cur;
 
             cur = nxt;
         }
@@ -50,10 +49,10 @@ CP::map_bst<KeyT,MappedT,CompareT> CP::map_bst<KeyT,MappedT,CompareT>::split(Key
     }
 
     mRoot = L;
-    L->parent = mRoot;
-    
+    if (mRoot) mRoot->parent = NULL;
+
     result.mRoot = R;
-    R->parent = result.mRoot;
+    if (result.mRoot) result.mRoot->parent = NULL;
 
     return result;
 }
