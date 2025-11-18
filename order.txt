@@ -5,7 +5,6 @@ Q2
 Vector Some Move *
 
 Q4
-subtreeExtract
 imbalance
 BSTSplit
 
