@@ -21,6 +21,7 @@ size_t CP::list<T>::longest_palindrome() {
     result += 2;
     --L;
     ++R;
+    if (L == end()) break;
   }
   
   return result;
